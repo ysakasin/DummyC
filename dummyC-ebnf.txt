@@ -1,0 +1,103 @@
+translation_unit
+  : { extarnal_declaration }
+  ;
+
+extarnal_declaration
+  : function_declearation
+  | function_definition
+  ;
+
+function_declaration
+  : prototype , ";"
+  ;
+
+function_definition
+  : prototype , function_statement
+  ;
+
+prototype
+  : "int" , identifier , "(" , [ parameter, { "," , parameter} ] , ")"
+  ;
+
+parameter
+  : "int" , identifier
+  ;
+
+function_statement
+  : "{" , [ variable_declaration_list ] , statement_list , "}"
+  ;
+
+variable_declaration_list
+  : { variable_declaration }
+  ;
+
+variable_declaration
+  : "int" , identifire, ";"
+  ;
+
+statement_list
+  : { statement }
+  ;
+
+statement
+  : expression_statement
+  | jumpstatement
+  ;
+
+expression_statement
+  : ";"
+  | assignment_expression, ";"
+  ;
+
+jump_statement
+  : "return", assignment_expression, ";"
+  ;
+
+assignment_expression
+  : identifier , "=", additive_experssion
+  | additive_expression
+  ;
+
+additive_expression
+  : multiplicative_expression , [ { "+" , multiplicative_expression | "-", multiplicative_expression } ]
+  ;
+
+multiplicative_expression
+  : postfix_expression , [ { "*" , postfix_expression | "/" , postdix_expression } ]
+  ;
+
+postfix_expression
+  : primary_expression
+  | identifier,  "(" , [ assignment_expression , { "," , assignment_expression } ] , ")"
+  ;
+
+primary_expression
+  : identifier
+  | integer
+  | "(" , additive_expression , ")"
+  ;
+
+identifier
+  : character , [ { character | digit } ]
+  ;
+
+integer
+  : "0" | [ "-" ] digit_excluding_zero, [ { digit } ]
+  ;
+
+character
+  : "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J"
+  | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T"
+  | "U" | "V" | "W" | "X" | "Y" | "Z"
+  | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j"
+  | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t"
+  | "u" | "v" | "w" | "x" | "y" | "z"
+  ;
+
+digit_excluding_zero
+  : "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+  ;
+
+digit
+  : "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+  ;
