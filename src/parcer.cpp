@@ -57,3 +57,34 @@ bool Parser::visitExternalDeclaration(TranslationUnitAST *tunit){
 
   return false;
 }
+
+PrototypeAST *Parser::zisitFunctionDeclaration(){
+  int backup = Tokens->getCurIndex();
+  PrototypeAST *proto = visitPrototype();
+  if(!proto){
+    return NULL;
+  }
+
+  if(Tokens->getCurString() == ';'){
+    // 本来であればここで再定義されていないか確認
+    Tokens->getNextToken();
+    return proto;
+  }
+  else{
+    SAFE_DELETE(proto);
+    Tokens->applyTokenIndex(backup);
+    return NULL;
+  }
+}
+
+FunctionAST *Parser::visitFunctionDefinition(){
+  int backup = Tokens->getCurIndex();
+
+  PrototypeAST *proto = visitPrototype();
+  if(!proto){
+    return NULL;
+  }
+
+  // 本来であればここで再定義されていないか確認
+  FunctionStmtAST *func_stmt = visitFunctionStatement(proto);
+}
