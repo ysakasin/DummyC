@@ -6,13 +6,13 @@ Parcer::Parcer(std::string filename){
     @return 成功：true 失敗：false
 */
 bool Parser::doParse(){
-    if(!Tokens){
-      fprintf(stderr, "error at lexer\n");
-      return false;
-    }
-    else{
-      return VisitTranslationUnit();
-    }
+  if(!Tokens){
+    fprintf(stderr, "error at lexer\n");
+    return false;
+  }
+  else{
+    return VisitTranslationUnit();
+  }
 };
 
 TranslationUnitAST &Parser::getAST(){
