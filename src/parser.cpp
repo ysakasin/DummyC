@@ -65,7 +65,7 @@ PrototypeAST *Parser::zisitFunctionDeclaration(){
     return NULL;
   }
 
-  if(Tokens->getCurString() == ';'){
+  if(Tokens->getCurString() == ";"){
     // 本来であればここで再定義されていないか確認
     Tokens->getNextToken();
     return proto;
@@ -87,4 +87,31 @@ FunctionAST *Parser::visitFunctionDefinition(){
 
   // 本来であればここで再定義されていないか確認
   FunctionStmtAST *func_stmt = visitFunctionStatement(proto);
+}
+
+PrototypeAST *Parser::visitPrototype(){
+  int backup = Tokens->getCurIndex();
+
+  bool is_first_param = true;
+  std::vector<std::string> param_list;
+  while(true){
+    if(!is_first_param && Tokens->getCurType() == TOK_SYMBOL && Tokens->getCurString() == ","){
+      Tokens->getNextToken();
+    }
+    if(Tokens->getCurType() == TOK_INT){
+      Tokens->getNextToken();
+    }
+    else{
+      break;
+    }
+
+    if(Tokens->getCurType() == TOK_IDENTIFIRE){
+      param_list.push_back(Tokens->getCurString());
+      Tokens->getNextToken();
+    }
+    else{
+      Tokens->applyTokenIndex(buckup);
+      return NULL;
+    }
+  }
 }
