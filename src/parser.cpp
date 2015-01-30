@@ -115,3 +115,62 @@ PrototypeAST *Parser::visitPrototype(){
     }
   }
 }
+
+FunctionStmtAST *Parser::visitFunvtionStatement(PrototypeAST *proto){
+  int buckup = Tokens->getCurIndex();
+
+  if(Tokens->getCurString() == "{"){
+    Tokens->getNextToken();
+  }
+  else{
+    return NULL;
+  }
+
+  FunctionStmtAST *func_stmt = new FunctionStmtAST();
+
+  for(int i = 0; i < proto->getparamNum(); i++){
+    VariableDeclAST *vdecl = new VariableDeclAST(proto->getParamName(i));
+    vdecl->setDeclType(VariableDeclAST::param);
+    func_stmt->addVariableDeclaration(vdecl);
+    VariableTable.push_back(vdecl->getName());
+  }
+
+  /* omit */
+
+  else if(var_decl = visitVariableDeclaration()){
+    while(var_decl){
+      var_decl->setDeclType(VariableDeclAST::local);
+
+      /* TODO : 二重宣言のチェック */
+
+      func_stmt->addVariableDeclaration(var_decl);
+      VariableTable.push_back(var_decl->getName());
+      var_decl = visitVariabeDeclaration();
+    }
+
+    if(stmt = visitStatement()){
+      while(stmt){
+        last_stmt = stmt;
+        func_stmt -> addStatement(stmt);
+        stmt = visitStatement();
+      }
+    }
+  }
+  else{
+    SAFE_DELETE(func_stmt);
+    Tokens->applyTokenIndex(bkup);
+    return NULL;
+  }
+
+  /* TODO : 戻り値の確認 */
+
+  if(Tokens->getCurString() == "}"){
+    Tokens->getNextToken();
+    return func_stmt;
+  }
+  else{
+    SAFE_DELETE(func_stmt);
+    Tokens->applyTokenIndex(bkup);
+    return NULL;
+  }
+}
