@@ -174,3 +174,36 @@ FunctionStmtAST *Parser::visitFunvtionStatement(PrototypeAST *proto){
     return NULL;
   }
 }
+
+BaseAST *Parser::visitAssignmentExpression(){
+  int bkup = Tokens-> getCurIndex();
+
+  BaseAST *lhs;
+  if(Tokens->getCurType() == TOK_IDENTIFIRE){
+
+    /* TODO : 変数の宣言確認 */
+
+    lhs = new VariableAST(Tokens->getCurString());
+    Tokens->getNextToken();
+    BaseAST *rhs;
+    if(Tokens->getCurType() == TOK_SYMBOL && Tokens->getCurString() == "="){
+      Tokens->getNextToken();
+      if(rhs = visit AdditiveExpression(NULL)){
+        return new BinaryExprAST("=", lhs, rhs);
+      }
+      else{
+        SAFE_DELETE(lhs);
+        Tokens->applyTokenIndex(bkup);
+      }
+    }
+    else{
+      SAFE_DELETE(lhs);
+      Tokens->applyTokenIndex(bkup);
+    }
+  }
+  BaseAST *add_expr = visitAdditiveExpression(NULL);
+  if(add_expr){
+    return add_expr;
+  }
+  return NULL;
+}
