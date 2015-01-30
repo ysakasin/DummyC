@@ -58,7 +58,7 @@ bool Parser::visitExternalDeclaration(TranslationUnitAST *tunit){
   return false;
 }
 
-PrototypeAST *Parser::zisitFunctionDeclaration(){
+PrototypeAST *Parser::visitFunctionDeclaration(){
   int backup = Tokens->getCurIndex();
   PrototypeAST *proto = visitPrototype();
   if(!proto){
