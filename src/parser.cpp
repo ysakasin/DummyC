@@ -207,3 +207,24 @@ BaseAST *Parser::visitAssignmentExpression(){
   }
   return NULL;
 }
+
+BaseAST *Parser::visitPrimaryExpression(){
+  int bkup = Tokens->getCurIndex();
+
+  if(Tokens->getCurType() == TOK_IDENTIFIER){
+    /* TODO : 変数の宣言確認 */
+
+    std::string var_name = Tokens->getCurString();
+    Tokens->getNextToken();
+    return new VariableAST(var_name);
+  }
+  else if(Tokens->getCurType() == TOK_DIGIT){
+    int val = Tokens->getCurNumVal();
+    Tokens->getNextToken();
+    return new NumberAST(val);
+  }
+  else if(Tokens->getCurType() == TOK_SYMBOL && Tokens->getCurString == "-"){
+    /* omit */
+  }
+  return NULL;
+}
