@@ -3,6 +3,7 @@ enum AstID
   BaseID,
   VariableDeclID,
   BinaryExprID,
+  NullExprID,
   CallExprID,
   JumpStmtID,
   VariableID,
@@ -17,6 +18,19 @@ public:
   BaseAST(AstID id) : ID(id){};
   virtual ~BaseAST(){};
   AstID getValueID() const {return ID;};
+};
+
+// ; を示すAST
+class NullAST : public BaseAST
+{
+public:
+  NullExpreAST() : BaseAST(NullExprID){}
+
+  static inline bool classof(NullExpreAST const*){return true;}
+  
+  static inline bool classof(BaseAST const* base){
+    return base->getValueID() == NullExprID;
+  }
 };
 
 // 変数宣言

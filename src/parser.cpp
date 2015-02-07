@@ -317,6 +317,21 @@ BaseAST *Parser::visitAdditiveExpression(BaseAST *lhs){
       return NULL;
     }
   }
-  
+
   return lhs;
+}
+
+BaseAST *Parser::visitExpressionStatement(){
+  BaseAST *assign_expr;
+  if(Tokens->getCurString() == ";"){
+    Tokens->getNextToken();
+    return new NullExprAST();
+  }
+  else if(assign_expr = visitAssignmentExpression()){
+    if(Tokens->getCurString() == ";"){
+      Tokens->getNextToken();
+      return assign_expr;
+    }
+  }
+  return NULL;
 }
