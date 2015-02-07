@@ -5,6 +5,10 @@ private:
   TokenStream *Tokens;
   TranslationUnitAST *TU;
 
+  std::vector<std::string> VariableTable;
+  std::map<std::string, int> ProtorypeTable;
+  std::map<std::string, int> FunctionTable;
+
 public:
   Parser(std::string filename);
   ~Parser(){
