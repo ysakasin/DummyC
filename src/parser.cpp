@@ -126,7 +126,7 @@ PrototypeAST *Parser::visitPrototype(){
   }
 }
 
-FunctionStmtAST *Parser::visitFunvtionStatement(PrototypeAST *proto){
+FunctionStmtAST *Parser::visitFunctionStatement(PrototypeAST *proto){
   int bkup = Tokens->getCurIndex();
 
   if(Tokens->getCurString() == "{"){
