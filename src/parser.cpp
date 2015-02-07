@@ -250,7 +250,7 @@ BaseAST *Parser::visitPostfixExpression(){
     BaseAST *assign_expr = visitAssignmentExpression();
     if(assign_expr){
       args.push_back(assign_expr);
-      while(Tokens->getCurType() == TOK_SYMBOL && Tokens->getCurString() == ','){
+      while(Tokens->getCurType() == TOK_SYMBOL && Tokens->getCurString() == ","){
         Tokens->getNextToken();
         assign_expre = visitAssignmentExpression();
         if(assign_expre){
@@ -264,7 +264,7 @@ BaseAST *Parser::visitPostfixExpression(){
 
     /* TODO : 引数の数を確認 */
 
-    if(Tokens->getCurType() == TOK_SYMBOL && Tokens->getCurString == ')'){
+    if(Tokens->getCurType() == TOK_SYMBOL && Tokens->getCurString == ")"){
       Tokens->getNextToken();
       return new CallExprAST(Callee, args);
     }
