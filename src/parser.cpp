@@ -228,3 +228,55 @@ BaseAST *Parser::visitPrimaryExpression(){
   }
   return NULL;
 }
+
+BaseAST *Parser::visitPostfixExpression(){
+  int bkup = Tokens->getCurIndex();
+
+  /* omit */
+
+  if(Tokens->getCurType() == TOK_IDENTIFIRE){
+    /* TODO : 関数の宣言確認 */
+
+    std::string Callee = Tokens->getCurString();
+    Tokens->getNextToken();
+
+    if(Tokens->getCurType() != TOK_SYMBOL || Tokens->getCurString() != "("){
+      Tokens->applyTokenIndex(bkup);
+      return NULL;
+    }
+
+    Tokens->getNextToken();
+    std::vector<BaseAST*> args;
+    BaseAST *assign_expr = visitAssignmentExpression();
+    if(assign_expr){
+      args.push_back(assign_expr);
+      while(Tokens->getCurType() == TOK_SYMBOL && Tokens->getCurString() == ','){
+        Tokens->getNextToken();
+        assign_expre = visitAssignmentExpression();
+        if(assign_expre){
+          args.push_back(assign_expr);
+        }
+        else{
+          break;
+        }
+      }
+    }
+
+    /* TODO : 引数の数を確認 */
+
+    if(Tokens->getCurType() == TOK_SYMBOL && Tokens->getCurString == ')'){
+      Tokens->getNextToken();
+      return new CallExprAST(Callee, args);
+    }
+    else{
+      for(int i = 0; i < args.size(); i++){
+        SAFE_DELETE(args[i]);
+      }
+      Tokens->applyTokenIndex(bkup);
+      return NULL;
+    }
+  }
+  else{
+    return NULL;
+  }
+}
