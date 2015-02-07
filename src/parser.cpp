@@ -59,7 +59,7 @@ bool Parser::visitExternalDeclaration(TranslationUnitAST *tunit){
 }
 
 PrototypeAST *Parser::visitFunctionDeclaration(){
-  int backup = Tokens->getCurIndex();
+  int bkup = Tokens->getCurIndex();
   PrototypeAST *proto = visitPrototype();
   if(!proto){
     return NULL;
@@ -82,13 +82,13 @@ PrototypeAST *Parser::visitFunctionDeclaration(){
   }
   else{
     SAFE_DELETE(proto);
-    Tokens->applyTokenIndex(backup);
+    Tokens->applyTokenIndex(bkup);
     return NULL;
   }
 }
 
 FunctionAST *Parser::visitFunctionDefinition(){
-  int backup = Tokens->getCurIndex();
+  int bkup = Tokens->getCurIndex();
 
   PrototypeAST *proto = visitPrototype();
   if(!proto){
@@ -100,7 +100,7 @@ FunctionAST *Parser::visitFunctionDefinition(){
 }
 
 PrototypeAST *Parser::visitPrototype(){
-  int backup = Tokens->getCurIndex();
+  int bkup = Tokens->getCurIndex();
 
   bool is_first_param = true;
   std::vector<std::string> param_list;
@@ -120,14 +120,14 @@ PrototypeAST *Parser::visitPrototype(){
       Tokens->getNextToken();
     }
     else{
-      Tokens->applyTokenIndex(buckup);
+      Tokens->applyTokenIndex(bkup);
       return NULL;
     }
   }
 }
 
 FunctionStmtAST *Parser::visitFunvtionStatement(PrototypeAST *proto){
-  int buckup = Tokens->getCurIndex();
+  int bkup = Tokens->getCurIndex();
 
   if(Tokens->getCurString() == "{"){
     Tokens->getNextToken();
