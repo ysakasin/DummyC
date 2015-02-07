@@ -94,9 +94,23 @@ FunctionAST *Parser::visitFunctionDefinition(){
   if(!proto){
     return NULL;
   }
+  else if(// 関数定義の重複が無いか確認
+      (PrototypeTable.find(proto->getName() != PrototypeTable.end() &&
+       PrototypeTable[proto->getName()] != proto->getParamNum()) ||
+      FunctionTable.find(proto->getName()) != FunctionTable.end()){
+    fprintf(stderr, "Function : %s is redefined", proto->getName().c_str());
+    SADE_DELETE(proto);
+    return NULL
+  }
 
-  // 本来であればここで再定義されていないか確認
+  VariableTable.clear();
   FunctionStmtAST *func_stmt = visitFunctionStatement(proto);
+  if(func_stmt){
+    FunctionTable[proto->getName()] = proto->getParamNum();
+    return new FunctionAST(proto, func_stmt);
+  }
+
+  /* omit */
 }
 
 PrototypeAST *Parser::visitPrototype(){
