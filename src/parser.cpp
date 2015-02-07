@@ -65,8 +65,18 @@ PrototypeAST *Parser::visitFunctionDeclaration(){
     return NULL;
   }
 
+  // prototype
   if(Tokens->getCurString() == ";"){
-    // 本来であればここで再定義されていないか確認
+    // 再定義されていないか確認
+    if( PrototypeTable.find(proto->getName()) != PrototypeTable.end() ||
+        (FunctionTable.find(proto->getName()) != FunctionTable.end() &&
+        FunctionTable[proto->getName()] != proto->getParamNum()) ){
+      fprintf(stderr, "Function : %s is redefined", proto->getName().c_str());
+      SAFE_DELETE(proto);
+      return NULL;
+    }
+    // プロトタイプ宣言テーブルに追加
+    PrototypeTable[proto->getName()] = proto->getParamNum();
     Tokens->getNextToken();
     return proto;
   }
