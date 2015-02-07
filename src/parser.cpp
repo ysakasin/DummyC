@@ -280,3 +280,43 @@ BaseAST *Parser::visitPostfixExpression(){
     return NULL;
   }
 }
+
+BaseAST *Parser::visitAdditiveExpression(BaseAST *lhs){
+  int bkup = Tokens->getCurIndex();
+
+  if(!lhs){
+    lhs = visitMultiplicativeExpression(NULL);
+  }
+
+  if(!lhs){
+    return NULL;
+  }
+
+  BaseAST *rhs;
+  if(Tokens->getCurType() == TOR_SYMBOL && Tokens->getCurString() == "+"){
+    Tokens->getNextToken();
+    rhs = visitMultiplcativeExpression(NULL);
+    if(rhs){
+      return visitAdditiveExpression(new BinaryExprAST("+", lhs, rhs));
+    }
+    else{
+      SAFE_DELETE(lhs);
+      Tokens->applyTokenIndex(bkup);
+      return NULL;
+    }
+  }
+  else if(Tokens->getCurType() == TOR_SYMBOL && Tokens->getCurString() == "-"){
+    Tokens->getNextToken();
+    rhs = visitMultiplcativeExpression(NULL);
+    if(rhs){
+      return visitAdditiveExpression(new BinaryExprAST("-", lhs, rhs));
+    }
+    else{
+      SAFE_DELETE(lhs);
+      Tokens->applyTokenIndex(bkup);
+      return NULL;
+    }
+  }
+  
+  return lhs;
+}
