@@ -130,6 +130,11 @@ PrototypeAST *Parser::visitPrototype(){
     }
 
     if(Tokens->getCurType() == TOK_IDENTIFIRE){
+      // 引数の変数名に重複が無いか確認
+      if(std::find(param_list.begin(), param_list_end()), Tokens->getCurString()) != param_list.end()){
+        Tokens->applyTokenIndex(bkup);
+        return NULL;
+      }
       param_list.push_back(Tokens->getCurString());
       Tokens->getNextToken();
     }
