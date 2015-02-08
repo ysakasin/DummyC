@@ -170,7 +170,12 @@ FunctionStmtAST *Parser::visitFunctionStatement(PrototypeAST *proto){
     while(var_decl){
       var_decl->setDeclType(VariableDeclAST::local);
 
-      /* TODO : 二重宣言のチェック */
+      // 変数名の重複チェック
+      if(std::find(VariableTable.begin(), VariableTable.end(), var_decl.getName()) != VariableTable.end()){
+        SAFE_DELETE(var_decl);
+        SAFE_DELETE(func_stmt);
+        return NULL
+      }
 
       func_stmt->addVariableDeclaration(var_decl);
       VariableTable.push_back(var_decl->getName());
@@ -191,7 +196,12 @@ FunctionStmtAST *Parser::visitFunctionStatement(PrototypeAST *proto){
     return NULL;
   }
 
-  /* TODO : 戻り値の確認 */
+  // 最後のStatementがjump_statementであるか確認
+  if(!last_stmt || !isa<JumpStmtAST>(last_stmt)){
+    SAFE_DELETE(func_stmt);
+    Tokens->applyTokenIndex(bkup);
+    return NULL;
+  }
 
   if(Tokens->getCurString() == "}"){
     Tokens->getNextToken();
