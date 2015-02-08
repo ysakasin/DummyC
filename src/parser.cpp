@@ -276,7 +276,18 @@ BaseAST *Parser::visitPostfixExpression(){
   /* omit */
 
   if(Tokens->getCurType() == TOK_IDENTIFIRE){
-    /* TODO : 関数の宣言確認 */
+    int param_num;
+    // プロトタイプ宣言されているか確認
+    if(PrototypeTable.find(Tokens->getCurString()) != PrototypeTable.end()){
+      param_num = FunctionTable[Tokens->getCurString()];
+    }
+    // 関数定義みであるか確認
+    else if(FunctionTable.find(Tokens->getCurString()) != PrototypeTable.end()){
+      param_num = FunctionTable[Tokens->getCurString()];
+    }
+    else{
+      return NULL;
+    }
 
     std::string Callee = Tokens->getCurString();
     Tokens->getNextToken();
@@ -303,7 +314,14 @@ BaseAST *Parser::visitPostfixExpression(){
       }
     }
 
-    /* TODO : 引数の数を確認 */
+    // 引数の数を確認
+    if(args.size() != param_num){
+      for(int i = 0; i < args.size(); i++){
+        SAFE_DELETE(args[i]);
+      }
+      Tokens->applyTokenIndex(bkup);
+      return NULL;
+    }
 
     if(Tokens->getCurType() == TOK_SYMBOL && Tokens->getCurString == ")"){
       Tokens->getNextToken();
