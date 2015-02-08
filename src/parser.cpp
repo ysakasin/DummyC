@@ -219,16 +219,20 @@ BaseAST *Parser::visitAssignmentExpression(){
 
   BaseAST *lhs;
   if(Tokens->getCurType() == TOK_IDENTIFIRE){
-
-    /* TODO : 変数の宣言確認 */
-
-    lhs = new VariableAST(Tokens->getCurString());
-    Tokens->getNextToken();
-    BaseAST *rhs;
-    if(Tokens->getCurType() == TOK_SYMBOL && Tokens->getCurString() == "="){
+    // 変数宣言されているか確認
+    if(std::find(VariableTable.begin(), VariableTable.end(), Tokens->getCurString() != VariableTable.end()){
+      lhs = new VariableAST(Tokens->getCurString());
       Tokens->getNextToken();
-      if(rhs = visit AdditiveExpression(NULL)){
-        return new BinaryExprAST("=", lhs, rhs);
+      BaseAST *rhs;
+      if(Tokens->getCurType() == TOK_SYMBOL && Tokens->getCurString() == "="){
+        Tokens->getNextToken();
+        if(rhs = visit AdditiveExpression(NULL)){
+          return new BinaryExprAST("=", lhs, rhs);
+        }
+        else{
+          SAFE_DELETE(lhs);
+          Tokens->applyTokenIndex(bkup);
+        }
       }
       else{
         SAFE_DELETE(lhs);
@@ -236,7 +240,6 @@ BaseAST *Parser::visitAssignmentExpression(){
       }
     }
     else{
-      SAFE_DELETE(lhs);
       Tokens->applyTokenIndex(bkup);
     }
   }
