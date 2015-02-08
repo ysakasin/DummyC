@@ -253,9 +253,8 @@ BaseAST *Parser::visitAssignmentExpression(){
 BaseAST *Parser::visitPrimaryExpression(){
   int bkup = Tokens->getCurIndex();
 
-  if(Tokens->getCurType() == TOK_IDENTIFIER){
-    /* TODO : 変数の宣言確認 */
-
+  if(Tokens->getCurType() == TOK_IDENTIFIER &&
+    (std::find(VariableTable.begin(), VariableTable.end(), Tokens->getCurString()) != VariableTable.end())){
     std::string var_name = Tokens->getCurString();
     Tokens->getNextToken();
     return new VariableAST(var_name);
