@@ -114,3 +114,18 @@ Value *CodeGen::generateVariableDeclaration(VariableDeclAST *vdecl){
   }
   return alloca;
 }
+
+Value *CodeGen::generateStatement(BaseAST *stmt){
+  if(isa<BinaryExprAST>(stmt)){
+    return generateBinaryEcpression(dyn_cast<BinaryEcprAST>(stmt));
+  }
+  else if(isa<CallExpreAST>(stmt)){
+    return generateCallExoression(dyn_cast<CallEcprAST>(stmt));
+  }
+  else if(isa<JumpStmtAST>(stmt)){
+    return generateJumpStatement(dyn_cast<JumpStmtAST>(stmt));
+  }
+  else{
+    return NULL;
+  }
+}
