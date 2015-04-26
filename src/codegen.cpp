@@ -80,3 +80,28 @@ Function *CodeGen::generateFunctionDefinition(FucntionAST *func_ast, Module *mod
 
   return func;
 }
+
+Value *CodeGen::generateFunctionStatement(FunctionStmtAST *function_stmt){
+  VariableDeclAST *vdecl;
+  Value *v = NULL;
+  for(int i = 0; ; i++){
+    if(!func_stmt->getVariableDecl(i)){
+      break;
+    }
+    vdecl = dyn_cast<VariableDeclAST>(func_stmt->getVariableDecl(i));
+    v = generateVariableDeclaration(vdecl);
+  }
+
+  BaseAST *stmt;
+  for(int i = 0; ; i++){
+    stmt = func->getStatement(i);
+    if(!stmt){
+      break;
+    }
+    else if(!isa<NullExprAST>(stmt)){
+      v = generateStatement(stmt);
+    }
+  }
+
+  return v;
+}
