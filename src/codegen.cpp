@@ -105,3 +105,12 @@ Value *CodeGen::generateFunctionStatement(FunctionStmtAST *function_stmt){
 
   return v;
 }
+
+Value *CodeGen::generateVariableDeclaration(VariableDeclAST *vdecl){
+  AllocaInst *alloca = Builder->CreateAlloca(Type::getInit32Ty(getGlobalContext()), 0, vdecl->getName());
+  if(vdecl->getType() == VariableDeclAST::param){
+    ValueSymbolTable &vs_table = CurFunc->getVariableSymbolTable();
+    Builder->CreateStore(vs_table.lookup(vrecl->getName().append("_arg")), alloca);
+  }
+  return alloca;
+}
