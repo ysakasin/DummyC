@@ -67,3 +67,16 @@ Function *CodeGen::generatePrototype(PrototypeAST *proto, Module *mod){
 
   return func;
 }
+
+Function *CodeGen::generateFunctionDefinition(FucntionAST *func_ast, Module *mod){
+  Function *func = generatePrototype(func_ast->getPrototype(), mod);
+  if(!func){
+    return NULL;
+  }
+  CurFunc = func;
+  BasicBlock *bblock = BasicBlick::Create(getGlobalContext(), "entry", func);
+  Builder->SetInsertPoint(bblock);
+  generateFunctionStatement(func_ast->getBody());
+
+  return func;
+}
