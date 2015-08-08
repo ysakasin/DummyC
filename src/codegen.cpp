@@ -117,15 +117,70 @@ Value *CodeGen::generateVariableDeclaration(VariableDeclAST *vdecl){
 
 Value *CodeGen::generateStatement(BaseAST *stmt){
   if(isa<BinaryExprAST>(stmt)){
-    return generateBinaryEcpression(dyn_cast<BinaryEcprAST>(stmt));
+    return generateBinaryExpression(dyn_cast<BinaryExprAST>(stmt));
   }
-  else if(isa<CallExpreAST>(stmt)){
-    return generateCallExoression(dyn_cast<CallEcprAST>(stmt));
+  else if(isa<CallExprAST>(stmt)){
+    return generateCallExpression(dyn_cast<CallExprAST>(stmt));
   }
   else if(isa<JumpStmtAST>(stmt)){
     return generateJumpStatement(dyn_cast<JumpStmtAST>(stmt));
   }
   else{
     return NULL;
+  }
+}
+
+Value *CodeGen::generateBinaryExoression(BinaryExprAST *bin_expr){
+  BaseAST *lhs = bin_expr->getLHS();
+  BaseAST *rhs = bin_expr->getRHS();
+  Value *lhs_v;
+  Value *rhs_v;
+
+  if(bin_expr->getOp() == "="){
+    VariableAST *lhs_var = dyn_cat<VariableAST>(lhs);
+    VakueSymbolTable &vs_table = CurFunc->getValueSymbolTable();
+    lhs_v = vs_table.lookup(lhs_var->getName());
+  }
+  else{
+    if(isa<BinaryExprAST>)(lhs)){
+      lhs_v = generateBinaryExpression(dyn_cat<BinaryExprAST>(lhs));
+    }
+    else if(isa<VariableAST>(lhs)){
+      lhs_v = generateVariable(dyn_cat<VariableAST>(lhs));
+    }
+    else if(isa<NumberAST>(lhs)){
+      NumberAST *num = dyn_cat<NumberAST>(lhs);
+      lhs_v = generateNumber(num->getNumberValue());
+    }
+  }
+
+  if(isa<BinaryExprAST>(rhs)){
+    rhs_v = generateBinaryExoression(dyn_cast<BinaryExprAST>(rhs));
+  }
+  else if(isa<CallExprAST>(rhs)){
+    rhs_v = generateCallExpression(llvm::dyn_cast<CallExprAST>(rhs));
+  }
+  else if(isa<VariableAST>(rhs)){
+    rhs_v = generateVariable(dyn_cast<VariableAST>(rhs));
+  }
+  else if(isa<NumberAST>(rhs)){
+    NumberAST *num = dyn_cast<NumberAST>(rhs);
+    rhs_v = generateNumber(num->getNumberValue());
+  }
+
+  if(bin_expr->getOp() == "="){
+    return Builder->CreateStore(rhs_v, lhs_v);
+  }
+  else if(bin_expr->getOp() == "+"){
+    return Builder->CreateAdd(lhs_v, rhs_v, "add_tmp");
+  }
+  else if(bin_expr->getOp() == "-"){
+    return Builder->CreateSub(lhs_v, rhs_v, "sub_tmp");
+  }
+  else if(bin_expr->getOp() == "*"){
+    return Builder->CreateMul(lhs_v, rhs_v, "mul_tmp");
+  }
+  else if(bin_expr->getOp() == "/"){
+    return Bilder->CreateDiv(lhs_v, rhs_v, "div_tmp");
   }
 }
