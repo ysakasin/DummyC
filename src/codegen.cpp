@@ -130,32 +130,32 @@ Value *CodeGen::generateStatement(BaseAST *stmt){
   }
 }
 
-Value *CodeGen::generateBinaryExoression(BinaryExprAST *bin_expr){
+Value *CodeGen::generateBinaryExpression(BinaryExprAST *bin_expr){
   BaseAST *lhs = bin_expr->getLHS();
   BaseAST *rhs = bin_expr->getRHS();
   Value *lhs_v;
   Value *rhs_v;
 
   if(bin_expr->getOp() == "="){
-    VariableAST *lhs_var = dyn_cat<VariableAST>(lhs);
+    VariableAST *lhs_var = dyn_cast<VariableAST>(lhs);
     VakueSymbolTable &vs_table = CurFunc->getValueSymbolTable();
     lhs_v = vs_table.lookup(lhs_var->getName());
   }
   else{
     if(isa<BinaryExprAST>)(lhs)){
-      lhs_v = generateBinaryExpression(dyn_cat<BinaryExprAST>(lhs));
+      lhs_v = generateBinaryExpression(dyn_cast<BinaryExprAST>(lhs));
     }
     else if(isa<VariableAST>(lhs)){
-      lhs_v = generateVariable(dyn_cat<VariableAST>(lhs));
+      lhs_v = generateVariable(dyn_cast<VariableAST>(lhs));
     }
     else if(isa<NumberAST>(lhs)){
-      NumberAST *num = dyn_cat<NumberAST>(lhs);
+      NumberAST *num = dyn_cast<NumberAST>(lhs);
       lhs_v = generateNumber(num->getNumberValue());
     }
   }
 
   if(isa<BinaryExprAST>(rhs)){
-    rhs_v = generateBinaryExoression(dyn_cast<BinaryExprAST>(rhs));
+    rhs_v = generateBinaryExpression(dyn_cast<BinaryExprAST>(rhs));
   }
   else if(isa<CallExprAST>(rhs)){
     rhs_v = generateCallExpression(llvm::dyn_cast<CallExprAST>(rhs));
@@ -183,4 +183,39 @@ Value *CodeGen::generateBinaryExoression(BinaryExprAST *bin_expr){
   else if(bin_expr->getOp() == "/"){
     return Bilder->CreateDiv(lhs_v, rhs_v, "div_tmp");
   }
+}
+
+Value *CodeGen::generateCallExpression(CallExprAST *call_expr){
+  std::vector<Value*> arg_vec;
+  BaseAST *arg;
+  Value *arg_v;
+  VakueSymbolTable &vs_table = CurFunc->getValueSymbolTable();
+
+  for(int i = 0; ; i++){
+    if(!(arg = call_expr->getArgs(i))){
+      break;
+    }
+
+    if(isa<CallExprAST>(arg)){
+      arg_v = generateCallExpression(dyn_cast<CallExprAST>(arg));
+    }
+    else if(isa<BinaryExprAST>(arg)){
+      BinaryExprAST *bin_expr = dyn_cast<BinaryExprAST>(arg);
+      arg_v = generateBinaryExpression(dyn_cast<BinaryExprAST>(arg));
+      if(bin_expr->getOp() == "="){
+        VariableAST *var = dyn_cast<VariableAST>(bin_expr->getLHS());
+        arg_v = Builder->CreateLoad(vs_table.lookup(var->getName(), "arg_val"));
+      }
+    }
+    else if(isa<VariableAST>(arg)){
+      arg_v = generateVariable(dyn_cast<VariableAST>(arg));
+    }
+    else if(isa<NumberAST>(arg)){
+      NumberAST *num = dyn_cast<NumberAST>(arg);
+      arg_v = generateNumber(num->getNumberValue());
+    }
+    arg_vec.push_bach(arg_v);
+  }
+
+  return Builder->CreateCall(Mod->getFunction(call_expr->getCallee()), arg_vec, "call_tmp");
 }
