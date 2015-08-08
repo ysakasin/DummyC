@@ -1,3 +1,8 @@
+#ifndef OPTION_HPP
+#define OPTION_HPP
+
+#include <string>
+
 class OptionParser
 {
 private:

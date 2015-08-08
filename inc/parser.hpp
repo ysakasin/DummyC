@@ -1,3 +1,16 @@
+#ifndef PARSER_HPP
+#define PARSER_HPP
+
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <map>
+#include <string>
+#include <vector>
+#include "APP.hpp"
+#include "AST.hpp"
+#include "lexer.hpp"
+
 // 構文解析・意味解析
 class Parser
 {

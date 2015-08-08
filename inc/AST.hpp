@@ -1,3 +1,13 @@
+#ifndef AST_HPP
+#define AST_HPP
+
+
+#include <string>
+#include <map>
+#include <vector>
+#include <llvm/Support/Casting.h>
+#include "APP.hpp"
+
 enum AstID
 {
   BaseID,
@@ -27,7 +37,7 @@ public:
   NullExpreAST() : BaseAST(NullExprID){}
 
   static inline bool classof(NullExpreAST const*){return true;}
-  
+
   static inline bool classof(BaseAST const* base){
     return base->getValueID() == NullExprID;
   }

@@ -1,3 +1,14 @@
+#ifndef LEXER_HPP
+#define LEXER_HPP
+
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <list>
+#include <string>
+#include <vector>
+#include "APP.hpp"
+
 enum TokenType
 {
   TOK_IDENTIFIRE,
