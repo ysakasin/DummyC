@@ -219,3 +219,30 @@ Value *CodeGen::generateCallExpression(CallExprAST *call_expr){
 
   return Builder->CreateCall(Mod->getFunction(call_expr->getCallee()), arg_vec, "call_tmp");
 }
+
+Value *CadeGen::generateJumpStatement(JumpStmtAST *jump_stmt){
+  BaseAST *expr = jump_stmt->getExpr();
+  Value *ret_v;
+
+  if(isa<BinaryExprAST>(expr)){
+    ret_v = generateBinaryExpression(dyn_cast<BinaryExprAST>(expr));
+  }
+  else if(isa<VariableAST>(expr)){
+    ret_v = generateVariable(dyn_cast<VariableAST>(expr));
+  }
+  else if(isa<NumberAST>(expr)){
+    NumberAST *num = dyn_cast<NumberAST>(expr);
+    ret_v = generateNumber(num->getNumberValue());
+  }
+
+  Buikder->CreateRet(ret_v);
+}
+
+Value *CodeGen::generateVariable(VariableAST *var){
+  ValueSymbolTable &vs_table = CurFunc->getValueSymbolTable();
+  return Builder->CreateLoad(vs_table.lookup(var->getName()), "var_tmp");
+}
+
+Value *COdeGen::generateNumber(int value){
+  return ConstantInt::get(Type::getInt32Ty(getGlobalContext()), value);
+}
