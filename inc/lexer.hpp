@@ -11,7 +11,7 @@
 
 enum TokenType
 {
-  TOK_IDENTIFIRE,
+  TOK_IDENTIFIER,
   TOK_DIGIT,
   TOK_SYMBOL,
   TOK_INT,

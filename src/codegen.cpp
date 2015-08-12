@@ -5,6 +5,12 @@ CodeGen::CodeGen(){
   Mod = NULL;
 }
 
+CodeGen::~CodeGen(){
+	SAFE_DELETE(Builder);
+	SAFE_DELETE(Mod);
+}
+
+
 bool CodeGen::doCodeGen(TranslationUnitAST &tunit, std::string name){
   return generateTranslationUnit(tunit, name);
 }

@@ -60,7 +60,7 @@ TokenStream *LexicalAnalysis(std::string input_filename){
           next_token = new Token(token_str, TOK_RETURN, line_num);
         }
         else{
-          next_token = new Token(token_str, TOK_IDENTIFIRE, line_num);
+          next_token = new Token(token_str, TOK_IDENTIFIER, line_num);
         }
       }
       // Number
