@@ -1,26 +1,28 @@
+#include "codegen.hpp"
+
 CodeGen::CodeGen(){
-  Builder = new IRBuilder<>(getClobalContext());
+  Builder = new llvm::IRBuilder<>(llvm::getGlobalContext());
   Mod = NULL;
 }
 
 bool CodeGen::doCodeGen(TranslationUnitAST &tunit, std::string name){
-  return generateTranstationUnit(tunit, name);
+  return generateTranslationUnit(tunit, name);
 }
 
-Module &CodeGen::getModule(){
+llvm::Module &CodeGen::getModule(){
   if(Mod){
     return *Mod;
   }
   else{
-    return *(new Module("null", getGlobalContext()));
+    return *(new llvm::Module ("null", llvm::getGlobalContext()));
   }
 }
 
-bool CodeGen::generateTranslationUnit(Tra slationUnitAST &tunit, std::string name){
-  Mod = new Module(name, getClobalContext());
+bool CodeGen::generateTranslationUnit(TranslationUnitAST &tunit, std::string name){
+  Mod = new llvm::Module (name, llvm::getGlobalContext());
 
   for(int i = 0; ; i++){
-    PrototypeAST *proto = trunit.getPrototype(i);
+    PrototypeAST *proto = tunit.getPrototype(i);
     if(!proto){
       break;
     }
@@ -31,11 +33,11 @@ bool CodeGen::generateTranslationUnit(Tra slationUnitAST &tunit, std::string nam
   }
 
   for(int i = 0; ; i++){
-    FunctionAST *func = trunit.getFunction(i);
+    FunctionAST *func = tunit.getFunction(i);
     if(!func){
       break;
     }
-    else if(!generateDunctionDefinition(func, Mod)){
+    else if(!generateFunctionDefinition(func, Mod)){
       SAFE_DELETE(Mod);
       return false;
     }
@@ -43,8 +45,8 @@ bool CodeGen::generateTranslationUnit(Tra slationUnitAST &tunit, std::string nam
   return true;
 }
 
-Function *CodeGen::generatePrototype(PrototypeAST *proto, Module *mod){
-  Function *func = mod->getFunction(proto->getName());
+llvm::Function *CodeGen::generatePrototype(PrototypeAST *proto, llvm::Module *mod){
+  llvm::Function *func = mod->getFunction(proto->getName());
   if(func){
     if(func->arg_size() == proto->getParamNum() && func->empty()){
       return func;
@@ -55,11 +57,11 @@ Function *CodeGen::generatePrototype(PrototypeAST *proto, Module *mod){
     }
   }
 
-  std::vector<Type*> int_types(proto->getParamNum(), Type::getInt32Ty(getGlobalContext()));
-  FunctionType *func_type = FunctionType::get(Type::getInt32Ty(getGlobalContext()), int_type, false);
-  func = Functin::Create(func_type, Function::ExternalLinkage, proto->getName(), mod);
+  std::vector<llvm::Type*> int_types(proto->getParamNum(), llvm::Type::getInt32Ty(llvm::getGlobalContext()));
+  llvm::FunctionType *func_type = llvm::FunctionType::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), int_types, false);
+  func = llvm::Function::Create(func_type, llvm::Function::ExternalLinkage, proto->getName(), mod);
 
-  Function::arg_iterator arg_iter = func->arg_begin();
+  llvm::Function::arg_iterator arg_iter = func->arg_begin();
   for(int i = 0; i< proto->getParamNum(); i++){
     arg_iter->setName(proto->getParamName(i).append("_arg"));
     arg_iter++;
@@ -68,37 +70,37 @@ Function *CodeGen::generatePrototype(PrototypeAST *proto, Module *mod){
   return func;
 }
 
-Function *CodeGen::generateFunctionDefinition(FucntionAST *func_ast, Module *mod){
-  Function *func = generatePrototype(func_ast->getPrototype(), mod);
+llvm::Function *CodeGen::generateFunctionDefinition(FunctionAST *func_ast, llvm::Module *mod){
+  llvm::Function *func = generatePrototype(func_ast->getPrototype(), mod);
   if(!func){
     return NULL;
   }
   CurFunc = func;
-  BasicBlock *bblock = BasicBlick::Create(getGlobalContext(), "entry", func);
+  llvm::BasicBlock *bblock = llvm::BasicBlock::Create(llvm::getGlobalContext(), "entry", func);
   Builder->SetInsertPoint(bblock);
   generateFunctionStatement(func_ast->getBody());
 
   return func;
 }
 
-Value *CodeGen::generateFunctionStatement(FunctionStmtAST *function_stmt){
+llvm::Value *CodeGen::generateFunctionStatement(FunctionStmtAST *func_stmt){
   VariableDeclAST *vdecl;
-  Value *v = NULL;
+  llvm::Value *v = NULL;
   for(int i = 0; ; i++){
     if(!func_stmt->getVariableDecl(i)){
       break;
     }
-    vdecl = dyn_cast<VariableDeclAST>(func_stmt->getVariableDecl(i));
+    vdecl = llvm::dyn_cast<VariableDeclAST>(func_stmt->getVariableDecl(i));
     v = generateVariableDeclaration(vdecl);
   }
 
   BaseAST *stmt;
   for(int i = 0; ; i++){
-    stmt = func->getStatement(i);
+    stmt = func_stmt->getStatement(i);
     if(!stmt){
       break;
     }
-    else if(!isa<NullExprAST>(stmt)){
+    else if(!llvm::isa<NullExprAST>(stmt)){
       v = generateStatement(stmt);
     }
   }
@@ -106,65 +108,65 @@ Value *CodeGen::generateFunctionStatement(FunctionStmtAST *function_stmt){
   return v;
 }
 
-Value *CodeGen::generateVariableDeclaration(VariableDeclAST *vdecl){
-  AllocaInst *alloca = Builder->CreateAlloca(Type::getInit32Ty(getGlobalContext()), 0, vdecl->getName());
+llvm::Value *CodeGen::generateVariableDeclaration(VariableDeclAST *vdecl){
+  llvm::AllocaInst *alloca = Builder->CreateAlloca(llvm::Type::getInt32Ty(llvm::getGlobalContext()), 0, vdecl->getName());
   if(vdecl->getType() == VariableDeclAST::param){
-    ValueSymbolTable &vs_table = CurFunc->getVariableSymbolTable();
-    Builder->CreateStore(vs_table.lookup(vrecl->getName().append("_arg")), alloca);
+    llvm::ValueSymbolTable &vs_table = CurFunc->getValueSymbolTable();
+    Builder->CreateStore(vs_table.lookup(vdecl->getName().append("_arg")), alloca);
   }
   return alloca;
 }
 
-Value *CodeGen::generateStatement(BaseAST *stmt){
-  if(isa<BinaryExprAST>(stmt)){
-    return generateBinaryExpression(dyn_cast<BinaryExprAST>(stmt));
+llvm::Value *CodeGen::generateStatement(BaseAST *stmt){
+  if(llvm::isa<BinaryExprAST>(stmt)){
+    return generateBinaryExprssion(llvm::dyn_cast<BinaryExprAST>(stmt));
   }
-  else if(isa<CallExprAST>(stmt)){
-    return generateCallExpression(dyn_cast<CallExprAST>(stmt));
+  else if(llvm::isa<CallExprAST>(stmt)){
+    return generateCallExpression(llvm::dyn_cast<CallExprAST>(stmt));
   }
-  else if(isa<JumpStmtAST>(stmt)){
-    return generateJumpStatement(dyn_cast<JumpStmtAST>(stmt));
+  else if(llvm::isa<JumpStmtAST>(stmt)){
+    return generateJumpStatement(llvm::dyn_cast<JumpStmtAST>(stmt));
   }
   else{
     return NULL;
   }
 }
 
-Value *CodeGen::generateBinaryExpression(BinaryExprAST *bin_expr){
+llvm::Value *CodeGen::generateBinaryExprssion(BinaryExprAST *bin_expr){
   BaseAST *lhs = bin_expr->getLHS();
   BaseAST *rhs = bin_expr->getRHS();
-  Value *lhs_v;
-  Value *rhs_v;
+  llvm::Value *lhs_v;
+  llvm::Value *rhs_v;
 
   if(bin_expr->getOp() == "="){
-    VariableAST *lhs_var = dyn_cast<VariableAST>(lhs);
-    VakueSymbolTable &vs_table = CurFunc->getValueSymbolTable();
+    VariableAST *lhs_var = llvm::dyn_cast<VariableAST>(lhs);
+    llvm::ValueSymbolTable &vs_table = CurFunc->getValueSymbolTable();
     lhs_v = vs_table.lookup(lhs_var->getName());
   }
   else{
-    if(isa<BinaryExprAST>)(lhs)){
-      lhs_v = generateBinaryExpression(dyn_cast<BinaryExprAST>(lhs));
+    if(llvm::isa<BinaryExprAST>(lhs)){
+      lhs_v = generateBinaryExprssion(llvm::dyn_cast<BinaryExprAST>(lhs));
     }
-    else if(isa<VariableAST>(lhs)){
-      lhs_v = generateVariable(dyn_cast<VariableAST>(lhs));
+    else if(llvm::isa<VariableAST>(lhs)){
+      lhs_v = generateVariable(llvm::dyn_cast<VariableAST>(lhs));
     }
-    else if(isa<NumberAST>(lhs)){
-      NumberAST *num = dyn_cast<NumberAST>(lhs);
+    else if(llvm::isa<NumberAST>(lhs)){
+      NumberAST *num = llvm::dyn_cast<NumberAST>(lhs);
       lhs_v = generateNumber(num->getNumberValue());
     }
   }
 
-  if(isa<BinaryExprAST>(rhs)){
-    rhs_v = generateBinaryExpression(dyn_cast<BinaryExprAST>(rhs));
+  if(llvm::isa<BinaryExprAST>(rhs)){
+    rhs_v = generateBinaryExprssion(llvm::dyn_cast<BinaryExprAST>(rhs));
   }
-  else if(isa<CallExprAST>(rhs)){
+  else if(llvm::isa<CallExprAST>(rhs)){
     rhs_v = generateCallExpression(llvm::dyn_cast<CallExprAST>(rhs));
   }
-  else if(isa<VariableAST>(rhs)){
-    rhs_v = generateVariable(dyn_cast<VariableAST>(rhs));
+  else if(llvm::isa<VariableAST>(rhs)){
+    rhs_v = generateVariable(llvm::dyn_cast<VariableAST>(rhs));
   }
-  else if(isa<NumberAST>(rhs)){
-    NumberAST *num = dyn_cast<NumberAST>(rhs);
+  else if(llvm::isa<NumberAST>(rhs)){
+    NumberAST *num = llvm::dyn_cast<NumberAST>(rhs);
     rhs_v = generateNumber(num->getNumberValue());
   }
 
@@ -181,68 +183,68 @@ Value *CodeGen::generateBinaryExpression(BinaryExprAST *bin_expr){
     return Builder->CreateMul(lhs_v, rhs_v, "mul_tmp");
   }
   else if(bin_expr->getOp() == "/"){
-    return Bilder->CreateDiv(lhs_v, rhs_v, "div_tmp");
+    return Builder->CreateSDiv(lhs_v, rhs_v, "div_tmp");
   }
 }
 
-Value *CodeGen::generateCallExpression(CallExprAST *call_expr){
-  std::vector<Value*> arg_vec;
+llvm::Value *CodeGen::generateCallExpression(CallExprAST *call_expr){
+  std::vector<llvm::Value*> arg_vec;
   BaseAST *arg;
-  Value *arg_v;
-  VakueSymbolTable &vs_table = CurFunc->getValueSymbolTable();
+  llvm::Value *arg_v;
+  llvm::ValueSymbolTable &vs_table = CurFunc->getValueSymbolTable();
 
   for(int i = 0; ; i++){
     if(!(arg = call_expr->getArgs(i))){
       break;
     }
 
-    if(isa<CallExprAST>(arg)){
-      arg_v = generateCallExpression(dyn_cast<CallExprAST>(arg));
+    if(llvm::isa<CallExprAST>(arg)){
+      arg_v = generateCallExpression(llvm::dyn_cast<CallExprAST>(arg));
     }
-    else if(isa<BinaryExprAST>(arg)){
-      BinaryExprAST *bin_expr = dyn_cast<BinaryExprAST>(arg);
-      arg_v = generateBinaryExpression(dyn_cast<BinaryExprAST>(arg));
+    else if(llvm::isa<BinaryExprAST>(arg)){
+      BinaryExprAST *bin_expr = llvm::dyn_cast<BinaryExprAST>(arg);
+      arg_v = generateBinaryExprssion(llvm::dyn_cast<BinaryExprAST>(arg));
       if(bin_expr->getOp() == "="){
-        VariableAST *var = dyn_cast<VariableAST>(bin_expr->getLHS());
-        arg_v = Builder->CreateLoad(vs_table.lookup(var->getName(), "arg_val"));
+        VariableAST *var = llvm::dyn_cast<VariableAST>(bin_expr->getLHS());
+        arg_v = Builder->CreateLoad(vs_table.lookup(var->getName()), "arg_val");
       }
     }
-    else if(isa<VariableAST>(arg)){
-      arg_v = generateVariable(dyn_cast<VariableAST>(arg));
+    else if(llvm::isa<VariableAST>(arg)){
+      arg_v = generateVariable(llvm::dyn_cast<VariableAST>(arg));
     }
-    else if(isa<NumberAST>(arg)){
-      NumberAST *num = dyn_cast<NumberAST>(arg);
+    else if(llvm::isa<NumberAST>(arg)){
+      NumberAST *num = llvm::dyn_cast<NumberAST>(arg);
       arg_v = generateNumber(num->getNumberValue());
     }
-    arg_vec.push_bach(arg_v);
+    arg_vec.push_back(arg_v);
   }
 
   return Builder->CreateCall(Mod->getFunction(call_expr->getCallee()), arg_vec, "call_tmp");
 }
 
-Value *CadeGen::generateJumpStatement(JumpStmtAST *jump_stmt){
+llvm::Value *CodeGen::generateJumpStatement(JumpStmtAST *jump_stmt){
   BaseAST *expr = jump_stmt->getExpr();
-  Value *ret_v;
+  llvm::Value *ret_v;
 
-  if(isa<BinaryExprAST>(expr)){
-    ret_v = generateBinaryExpression(dyn_cast<BinaryExprAST>(expr));
+  if(llvm::isa<BinaryExprAST>(expr)){
+    ret_v = generateBinaryExprssion(llvm::dyn_cast<BinaryExprAST>(expr));
   }
-  else if(isa<VariableAST>(expr)){
-    ret_v = generateVariable(dyn_cast<VariableAST>(expr));
+  else if(llvm::isa<VariableAST>(expr)){
+    ret_v = generateVariable(llvm::dyn_cast<VariableAST>(expr));
   }
-  else if(isa<NumberAST>(expr)){
-    NumberAST *num = dyn_cast<NumberAST>(expr);
+  else if(llvm::isa<NumberAST>(expr)){
+    NumberAST *num = llvm::dyn_cast<NumberAST>(expr);
     ret_v = generateNumber(num->getNumberValue());
   }
 
-  Buikder->CreateRet(ret_v);
+  Builder->CreateRet(ret_v);
 }
 
-Value *CodeGen::generateVariable(VariableAST *var){
-  ValueSymbolTable &vs_table = CurFunc->getValueSymbolTable();
+llvm::Value *CodeGen::generateVariable(VariableAST *var){
+  llvm::ValueSymbolTable &vs_table = CurFunc->getValueSymbolTable();
   return Builder->CreateLoad(vs_table.lookup(var->getName()), "var_tmp");
 }
 
-Value *COdeGen::generateNumber(int value){
-  return ConstantInt::get(Type::getInt32Ty(getGlobalContext()), value);
+llvm::Value *CodeGen::generateNumber(int value){
+  return llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), value);
 }

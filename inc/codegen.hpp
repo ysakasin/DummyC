@@ -8,44 +8,46 @@
 #include <string>
 #include <vector>
 #include <llvm/ADT/APInt.h>
-#include <llvm/Constants.h>
+#include <llvm/IR/Constants.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/Linker.h>
-#include <llvm/LLVMContext.h>
-#include <llvm/Module.h>
-#include <llvm/Metadata.h>
+#include <llvm/ExecutionEngine/MCJIT.h>
+#include <llvm-c/Linker.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Metadata.h>
 #include <llvm/Support/Casting.h>
-#include <llvm/IRBuilder.h>
-#include <llvm/Support/IRReader.h>
-#include <llvm/MDBuilder.h>
-#include <llvm/ValueSymbolTable.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IRReader/IRReader.h>
+#include <llvm/IR/MDBuilder.h>
+#include <llvm/IR/ValueSymbolTable.h>
 #include "APP.hpp"
 #include "AST.hpp"
 
 class CodeGen
 {
 private:
-  Function *CurFunc;
-  Module *Mod;
-  IRBuilder<> *Bulider;
+  llvm::Function *CurFunc;
+  llvm::Module  *Mod;
+  llvm::IRBuilder<> *Builder;
 
 public:
   CodeGen();
   ~CodeGen();
   bool doCodeGen(TranslationUnitAST &tunit, std::string name);
-  Module &getModule();
+  llvm::Module &getModule();
 
 private:
   bool generateTranslationUnit(TranslationUnitAST &tunit, std::string name);
-  Function *generateFunctionDefinition(FunctionAST *func, Module *mod);
-  Function *generatePrototype(PrototyoeAST *proto, Module *mod);
-  Value *generateFunctionStmt(FunctionStmtAST *func_stmt);
-  Value *generateVariableDeclartaion(VariableDeclAST *vdecl);
-  Value *generateStatement(BaseAST *stmt);
-  Value *generateBinaryExpression(BinaryExprAST *bin_expr);
-  Value *generateCallExpression(CallExprAST *call_expr);
-  Value *generateJumpStatement(JumpStmtAST *jump_stmt);
-  Value *generateVariable(VariableAST *var);
-  Value *generateNumber(int value);
+  llvm::Function *generateFunctionDefinition(FunctionAST *func, llvm::Module *mod);
+  llvm::Function *generatePrototype(PrototypeAST *proto, llvm::Module *mod);
+  llvm::Value *generateFunctionStatement(FunctionStmtAST *func_stmt);
+  llvm::Value *generateVariableDeclaration(VariableDeclAST *vdecl);
+  llvm::Value *generateStatement(BaseAST *stmt);
+  llvm::Value *generateBinaryExprssion(BinaryExprAST *bin_expr);
+  llvm::Value *generateCallExpression(CallExprAST *call_expr);
+  llvm::Value *generateJumpStatement(JumpStmtAST *jump_stmt);
+  llvm::Value *generateVariable(VariableAST *var);
+  llvm::Value *generateNumber(int value);
 };
+
+#endif

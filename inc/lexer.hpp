@@ -23,13 +23,13 @@ class Token
 {
 private:
   TokenType Type;
-  std::string Number;
+  std::string TokenString;
   int Number;
   int Line;
 
 public:
   Token(std::string string, TokenType type, int line) : TokenString(string), Type(type), Line(line){
-    if(type == TOK_DIGIT){
+    if(Type == TOK_DIGIT){
       Number = atoi(string.c_str());
     }
     else{
@@ -46,7 +46,7 @@ public:
   int getNumberValue(){return Number;};
 
   int getLine(){return Line;};
-}
+};
 
 class TokenStream
 {
@@ -55,8 +55,8 @@ private:
   int CurIndex;
 
 public:
-  TokenStream : CurIndex(0){};
-  ~TokenStream(){};
+  TokenStream() : CurIndex(0){};
+  ~TokenStream();
 
   bool ungetToken(int Times=1);
   bool getNextToken();
@@ -66,7 +66,7 @@ public:
   }
   Token getToken();
 
-  TokenType getCurToken(){return Tokens[CurIndex]->getTokenTyoe();};
+  TokenType getCurType(){return Tokens[CurIndex]->getTokenType();};
 
   std::string getCurString(){return Tokens[CurIndex]->getTokenString();};
 
@@ -76,7 +76,7 @@ public:
 
   bool applyTokenIndex(int index){CurIndex = index; return true;}
   bool printTokens();
-}
+};
 
 TokenStream::~TokenStream()
 {
@@ -103,7 +103,7 @@ bool TokenStream::getNextToken()
   }
 }
 
-bool TolenStream::ungetToken(int times)
+bool TokenStream::ungetToken(int times)
 {
   for(int i = 0; i < times; i++){
     if(CurIndex == 0){
@@ -128,3 +128,7 @@ bool TokenStream::printTokens()
   }
   return true;
 }
+
+TokenStream *LexicalAnalysis(std::string input_filename);
+
+#endif

@@ -1,4 +1,6 @@
-TokenStream *LexicalAnalysis(std:string input_filename){
+#include "lexer.hpp"
+
+TokenStream *LexicalAnalysis(std::string input_filename){
   TokenStream *tokens = new TokenStream();
   std::ifstream ifs;
   std::string cur_line;
@@ -6,7 +8,7 @@ TokenStream *LexicalAnalysis(std:string input_filename){
   int line_num = 0;
   bool iscomment = false;
 
-  ifs.open(input_filename.c_str(), std:ios::in);
+  ifs.open(input_filename.c_str(), std::ios::in);
   if(!ifs){
     return NULL;
   }
@@ -31,7 +33,7 @@ TokenStream *LexicalAnalysis(std:string input_filename){
       }
 
       // EOF
-      if(next_chat == EOF){
+      if(next_char == EOF){
         token_str = EOF;
         next_token = new Token(token_str, TOK_EOF, line_num);
       }
@@ -74,7 +76,7 @@ TokenStream *LexicalAnalysis(std:string input_filename){
             token_str += next_char;
             next_char = cur_line.at(index++);
           }
-          next_token = new Token(token_str, TOKEN_DIGIT, line_num);
+          next_token = new Token(token_str, TOK_DIGIT, line_num);
           index--;
         }
       }
@@ -113,7 +115,7 @@ TokenStream *LexicalAnalysis(std:string input_filename){
           next_token = new Token(token_str, TOK_SYMBOL, line_num);
         }
         else{
-          fprint(stderr, "unclear token : %c", next_char);
+          fprintf(stderr, "unclear token : %c", next_char);
           SAFE_DELETE(tokens);
           return NULL;
         }
@@ -125,11 +127,11 @@ TokenStream *LexicalAnalysis(std:string input_filename){
     }
 
     token_str.clear();
-    line_num++
+    line_num++;
   }
 
   // check EOF
-  if(ifd.eof()){
+  if(ifs.eof()){
     tokens->pushToken(new Token(token_str, TOK_EOF, line_num));
   }
 

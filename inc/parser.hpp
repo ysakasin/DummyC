@@ -19,14 +19,14 @@ private:
   TranslationUnitAST *TU;
 
   std::vector<std::string> VariableTable;
-  std::map<std::string, int> ProtorypeTable;
+  std::map<std::string, int> PrototypeTable;
   std::map<std::string, int> FunctionTable;
 
 public:
   Parser(std::string filename);
   ~Parser(){
     SAFE_DELETE(TU);
-    SAFE_DELETE(TOKENS);
+    SAFE_DELETE(Tokens);
   };
   bool doParse();
   TranslationUnitAST &getAST();
@@ -34,12 +34,12 @@ public:
 private:
   bool visitTranslationUnit();
   bool visitExternalDeclaration(TranslationUnitAST *tunit);
-  PrototypeAST *visitFunctionDeclation();
+  PrototypeAST *visitFunctionDeclaration();
   FunctionAST *visitFunctionDefinition();
   PrototypeAST *visitPrototype();
   FunctionStmtAST *visitFunctionStatement(PrototypeAST *proto);
   VariableDeclAST *visitVariableDeclaration();
-  BaseAST *visitStatenebt();
+  BaseAST *visitStatement();
   BaseAST *visitExpressionStatement();
   BaseAST *visitJumpStatement();
   BaseAST *visitAssignmentExpression();
@@ -48,3 +48,5 @@ private:
   BaseAST *visitPostfixExpression();
   BaseAST *visitPrimaryExpression();
 };
+
+#endif

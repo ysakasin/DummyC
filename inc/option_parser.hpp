@@ -16,8 +16,9 @@ public:
   void printHelp(){
     fprintf(stdout, "Compiler for DummyC\n");
   }
-  void printHelp();
   std::string getInputFileName(){return InputFilename;}
   std::string getOutputFileName(){return OutputFilename;}
   bool parseOption();
-}
+};
+
+#endif

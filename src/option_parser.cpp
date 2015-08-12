@@ -1,3 +1,5 @@
+#include "option_parser.hpp"
+
 bool OptionParser::parseOption(){
   if(Argc < 2){
     fprintf(stderr, "引数が足りません\n");
@@ -12,7 +14,7 @@ bool OptionParser::parseOption(){
       printHelp();
       return false;
     }
-    else if(Argv[i][0]) == '-'){
+    else if(Argv[i][0] == '-'){
       fprintf(stderr, "%s は不明なオプションです\n", Argv[i]);
       return false;
     }

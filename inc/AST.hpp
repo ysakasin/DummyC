@@ -31,12 +31,12 @@ public:
 };
 
 // ; を示すAST
-class NullAST : public BaseAST
+class NullExprAST : public BaseAST
 {
 public:
-  NullExpreAST() : BaseAST(NullExprID){}
+  NullExprAST() : BaseAST(NullExprID){}
 
-  static inline bool classof(NullExpreAST const*){return true;}
+  static inline bool classof(NullExprAST const*){return true;}
 
   static inline bool classof(BaseAST const* base){
     return base->getValueID() == NullExprID;
@@ -44,7 +44,7 @@ public:
 };
 
 // 変数宣言
-class VariableDexlAST : public BaseAST
+class VariableDeclAST : public BaseAST
 {
 public:
   typedef enum{
@@ -59,10 +59,10 @@ private:
 public:
   VariableDeclAST(const std::string &name) : BaseAST(VariableDeclID), Name(name){};
 
-  static inline bool classof(VariableDexlAST const*){return true;};
+  static inline bool classof(VariableDeclAST const*){return true;};
 
   static inline bool classof(BaseAST const* base){
-    return base->getValueID() == VariableDeclID
+    return base->getValueID() == VariableDeclID;
   };
 
   ~VariableDeclAST(){};
@@ -84,14 +84,14 @@ class BinaryExprAST : public BaseAST
   BaseAST *LHS, *RHS;
 
 public:
-  BinaryExpreAST(std::string op, BaseAST *lhs, BaseAST *rhs) : BaseAST(BinaryExpreID), Op(op), LHS(lhs), RHS(rhs){};
+  BinaryExprAST(std::string op, BaseAST *lhs, BaseAST *rhs) : BaseAST(BinaryExprID), Op(op), LHS(lhs), RHS(rhs){};
 
-  ~BinaryExpreAST(){SAFE_DELETE(LHS); SAFE_DELETE(RHS);};
+  ~BinaryExprAST(){SAFE_DELETE(LHS); SAFE_DELETE(RHS);};
 
-  static inline bool classof(BinaryExpreAST const*){return true;};
+  static inline bool classof(BinaryExprAST const*){return true;};
 
   static inline bool classof(BaseAST const* base){
-    return base->getValueID() == BinaryExpreAST;
+    return base->getValueID() == BinaryExprID;
   };
 
   std::string getOp(){return Op;};
@@ -111,9 +111,9 @@ public:
   CallExprAST(const std::string &callee, std::vector<BaseAST*> &args)
     : BaseAST(CallExprID), Callee(callee), Args(args){};
 
-  ~CallExpreAST();
+  ~CallExprAST();
 
-  static inline bool classof(CallexprAST const*){return true;};
+  static inline bool classof(CallExprAST const*){return true;};
 
   static inline bool classof(BaseAST const* base){
     return base->getValueID() == CallExprID;
@@ -148,7 +148,7 @@ public:
   };
 
   BaseAST *getExpr(){return Expr;};
-}
+};
 
 // 変数参照
 class VariableAST : public BaseAST
@@ -167,7 +167,7 @@ public:
   };
 
   std::string getName(){return Name;};
-}
+};
 
 class NumberAST : public BaseAST
 {
@@ -185,41 +185,6 @@ public:
   };
 
   int getNumberValue(){return Val;};
-}
-
-// ソースコード
-class TranslationUnitAST
-{
-  std::vector<PrototypeAST*> Prototypes;
-  std::vector<FunctionAST*> Functions;
-
-public:
-  TranslationUnitAST(){};
-  ~TranslationUnitAST();
-
-  bool addPrototype(PrototypeAST *proto);
-
-  bool addFunction(FunctionAST *func);
-
-  bool empty();
-
-  PrototypeAST *getPrototype(int i){
-    if(i < Prototypes.size()){
-      return Prototypes.at(i);
-    }
-    else{
-      return NULL;
-    }
-  }
-
-  FunctionAST *getFunction(int i){
-    if(i < Functions.size()){
-      return Prototypes.at(i);
-    }
-    else{
-      return NULL;
-    }
-  }
 };
 
 // 関数宣言
@@ -229,7 +194,7 @@ class PrototypeAST
   std::vector<std::string> Params;
 
 public:
-  PrototypeAST(const std::string &name, const std::Vector<std::string> &params)
+  PrototypeAST(const std::string &name, const std::vector<std::string> &params)
     : Name(name), Params(params){};
 
   std::string getName(){return Name;};
@@ -243,25 +208,7 @@ public:
     }
   }
   ;
-  int getParamNum(){return Params,size();};
-};
-
-// 関数定義
-class FunctionAST
-{
-  PrototypeAST *Proto;
-  FunctionStmtAST *Body;
-
-public:
-  FunctionAST(PrototypeAST *proto, FunctionStmtAST * body) : Proto(proto), Body(body){};
-
-  ~FunctionAST();
-
-  std::string getName(){return Proto->getName();};
-
-  PrototypeAST *getPrototype(){return Proto;};
-
-  FunctionStmtAST *getBody(){return Body;};
+  int getParamNum(){return Params.size();};
 };
 
 // 関数定義（ボディ）
@@ -297,3 +244,58 @@ public:
     }
   };
 };
+
+// 関数定義
+class FunctionAST
+{
+  PrototypeAST *Proto;
+  FunctionStmtAST *Body;
+
+public:
+  FunctionAST(PrototypeAST *proto, FunctionStmtAST * body) : Proto(proto), Body(body){};
+
+  ~FunctionAST();
+
+  std::string getName(){return Proto->getName();};
+
+  PrototypeAST *getPrototype(){return Proto;};
+
+  FunctionStmtAST *getBody(){return Body;};
+};
+
+// ソースコード
+class TranslationUnitAST
+{
+  std::vector<PrototypeAST*> Prototypes;
+  std::vector<FunctionAST*> Functions;
+
+public:
+  TranslationUnitAST(){};
+  ~TranslationUnitAST();
+
+  bool addPrototype(PrototypeAST *proto);
+
+  bool addFunction(FunctionAST *func);
+
+  bool empty();
+
+  PrototypeAST *getPrototype(int i){
+    if(i < Prototypes.size()){
+      return Prototypes.at(i);
+    }
+    else{
+      return NULL;
+    }
+  }
+
+  FunctionAST *getFunction(int i){
+    if(i < Functions.size()){
+      return Functions.at(i);
+    }
+    else{
+      return NULL;
+    }
+  }
+};
+
+#endif
